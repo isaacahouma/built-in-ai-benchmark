@@ -59,7 +59,7 @@ for await (const chunk of stream) {
 }
 ```
 
-To provide a more familiar metric, this benchmark also calculates **tokens per second**. This is achieved by using the `measureInputUsage()` method to convert the output string into tokens, as detailed in the [Prompt API documentation](https://github.com/webmachinelearning/prompt-api?tab=readme-ov-file#tokenization-context-window-length-limits-and-overflow).
+To provide a more familiar metric, this benchmark also calculates **tokens per second**. This is achieved by using the `measureContextUsage()` method to convert the output string into tokens, as detailed in the [Prompt API documentation](https://github.com/webmachinelearning/prompt-api?tab=readme-ov-file#tokenization-context-window-length-limits-and-overflow).
 
 ---
 
