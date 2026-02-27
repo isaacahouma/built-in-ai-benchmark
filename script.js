@@ -171,7 +171,7 @@ async function performGeneration(userPrompt, isWarmup = false) {
     let first_chunk_content = null;
     let generated_chunks = 0;
 
-    const prompt_tokens = await session.measureInputUsage(userPrompt);
+    const prompt_tokens = await session.measureContextUsage(userPrompt);
     const start_time = performance.now();
     const stream = session.promptStreaming(userPrompt);
 
@@ -195,7 +195,7 @@ async function performGeneration(userPrompt, isWarmup = false) {
     const decode_time = end_time - first_chunk_time;
     const e2e_time = end_time - start_time;
 
-    const total_tokens_used = await session.measureInputUsage(userPrompt + fullResponse);
+    const total_tokens_used = await session.measureContextUsage(userPrompt + fullResponse);
     const generated_tokens = total_tokens_used - prompt_tokens;
 
     const chunks_per_second_e2e = generated_chunks / e2e_time * 1000;
