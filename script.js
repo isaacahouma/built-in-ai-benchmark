@@ -12,6 +12,7 @@ const tokens1000Link = document.getElementById('tokens1000Link');
 let webGpuAvailable = false; // Flag to track WebGPU availability
 let promptApiAvailable = false; // Flag to track PromptAPI availability
 let session = null; // Session still tracked globally to manage closing if needed
+let measureUsageMethod = null; // Support both new (measureContextUsage) and legacy (measureInputUsage) APIs
 
 // Flags for controlling button state based on user's choice
 let selectedMode = null; // 'single' if generate response clicked, 'benchmark' if benchmark clicked
@@ -70,6 +71,11 @@ async function ensureSessionCreated(roundInfo = "") {
                 });
             },
         });
+        console.log(session)
+
+        // Support both new (measureContextUsage) and legacy (measureInputUsage) APIs
+        measureUsageMethod = session.measureContextUsage || session.measureInputUsage;
+
         updateStatus(`Session created${roundInfo}.`);
         return true;
     } catch (error) {
@@ -152,7 +158,7 @@ async function detectAvailability() {
 
 async function loadPrompt(tokenCount) {
     const promptText = EMBEDDED_PROMPTS[tokenCount];
-    
+
     if (promptText === undefined) {
         console.error(`Error: No embedded prompt found for ${tokenCount} tokens.`);
         return `Error: No embedded prompt found for ${tokenCount} tokens.`;
@@ -171,7 +177,8 @@ async function performGeneration(userPrompt, isWarmup = false) {
     let first_chunk_content = null;
     let generated_chunks = 0;
 
-    const prompt_tokens = await session.measureContextUsage(userPrompt);
+    const prompt_tokens = await measureUsageMethod.call(session, userPrompt);
+
     const start_time = performance.now();
     const stream = session.promptStreaming(userPrompt);
 
@@ -195,7 +202,8 @@ async function performGeneration(userPrompt, isWarmup = false) {
     const decode_time = end_time - first_chunk_time;
     const e2e_time = end_time - start_time;
 
-    const total_tokens_used = await session.measureContextUsage(userPrompt + fullResponse);
+    const total_tokens_used = await measureUsageMethod.call(session, userPrompt + fullResponse);
+
     const generated_tokens = total_tokens_used - prompt_tokens;
 
     const chunks_per_second_e2e = generated_chunks / e2e_time * 1000;
